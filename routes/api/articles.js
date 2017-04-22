@@ -6,7 +6,7 @@ var Comment = mongoose.model('Comment');
 var User = mongoose.model('User');
 var auth = require('../auth');
 
-
+// Preload article objects on routes with ':article'
 router.param('article', function(req, res, next, slug) {
   Article.findOne({ slug: slug})
     .populate('author')
@@ -138,7 +138,7 @@ router.post('/', auth.required, function(req, res, next) {
   }).catch(next);
 });
 
-
+// return a article
 router.get('/:article', auth.optional, function(req, res, next) {
   Promise.all([
     req.payload ? User.findById(req.payload.id) : null,
@@ -150,7 +150,7 @@ router.get('/:article', auth.optional, function(req, res, next) {
   }).catch(next);
 });
 
-
+// update article
 router.put('/:article', auth.required, function(req, res, next) {
   User.findById(req.payload.id).then(function(user){
     if(req.article.author._id.toString() === req.payload.id.toString()){
@@ -175,7 +175,7 @@ router.put('/:article', auth.required, function(req, res, next) {
   });
 });
 
-
+// delete article
 router.delete('/:article', auth.required, function(req, res, next) {
   User.findById(req.payload.id).then(function(user){
     if (!user) { return res.sendStatus(401); }
@@ -190,7 +190,7 @@ router.delete('/:article', auth.required, function(req, res, next) {
   }).catch(next);
 });
 
-
+// Favorite an article
 router.post('/:article/favorite', auth.required, function(req, res, next) {
   var articleId = req.article._id;
 
@@ -205,7 +205,7 @@ router.post('/:article/favorite', auth.required, function(req, res, next) {
   }).catch(next);
 });
 
-
+// Unfavorite an article
 router.delete('/:article/favorite', auth.required, function(req, res, next) {
   var articleId = req.article._id;
 
@@ -220,7 +220,7 @@ router.delete('/:article/favorite', auth.required, function(req, res, next) {
   }).catch(next);
 });
 
-
+// return an article's comments
 router.get('/:article/comments', auth.optional, function(req, res, next){
   Promise.resolve(req.payload ? User.findById(req.payload.id) : null).then(function(user){
     return req.article.populate({
@@ -241,7 +241,7 @@ router.get('/:article/comments', auth.optional, function(req, res, next){
   }).catch(next);
 });
 
-
+// create a new comment
 router.post('/:article/comments', auth.required, function(req, res, next) {
   User.findById(req.payload.id).then(function(user){
     if(!user){ return res.sendStatus(401); }
